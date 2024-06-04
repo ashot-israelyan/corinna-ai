@@ -1,7 +1,7 @@
 'use server';
 
-import { currentUser, redirectToSignIn } from "@clerk/nextjs";
-import { client } from "@/lib/prisma";
+import { clerkClient, currentUser, redirectToSignIn } from '@clerk/nextjs';
+import { client } from '@/lib/prisma';
 
 export const onIntegrateDomain = async (domain: string, icon: string) => {
 	const user = await currentUser();
@@ -10,7 +10,7 @@ export const onIntegrateDomain = async (domain: string, icon: string) => {
 	try {
 		const subscription = await client.user.findUnique({
 			where: {
-				clerkId: user.id
+				clerkId: user.id,
 			},
 			select: {
 				_count: {
@@ -31,7 +31,7 @@ export const onIntegrateDomain = async (domain: string, icon: string) => {
 				clerkId: user.id,
 				domains: {
 					some: {
-						name: domain
+						name: domain,
 					},
 				},
 			},
@@ -39,12 +39,9 @@ export const onIntegrateDomain = async (domain: string, icon: string) => {
 
 		if (!domainExists) {
 			if (
-				(subscription?.subscription?.plan == 'STANDARD' &&
-					subscription._count.domains < 1) ||
-				(subscription?.subscription?.plan == 'PRO' &&
-					subscription._count.domains < 5) ||
-				(subscription?.subscription?.plan == 'ULTIMATE' &&
-					subscription._count.domains < 10)
+				(subscription?.subscription?.plan == 'STANDARD' && subscription._count.domains < 1) ||
+				(subscription?.subscription?.plan == 'PRO' && subscription._count.domains < 5) ||
+				(subscription?.subscription?.plan == 'ULTIMATE' && subscription._count.domains < 10)
 			) {
 				const newDomain = await client.user.update({
 					where: {
@@ -63,22 +60,21 @@ export const onIntegrateDomain = async (domain: string, icon: string) => {
 							},
 						},
 					},
-				})
+				});
 
 				if (newDomain) {
-					return { status: 200, message: 'Domain successfully added' }
+					return { status: 200, message: 'Domain successfully added' };
 				}
 			}
 			return {
 				status: 400,
-				message:
-					"You've reached the maximum number of domains, upgrade your plan",
-			}
+				message: "You've reached the maximum number of domains, upgrade your plan",
+			};
 		}
 		return {
 			status: 400,
 			message: 'Domain already exists',
-		}
+		};
 	} catch (error) {
 		console.log(error);
 	}
@@ -91,7 +87,7 @@ export const onGetSubscriptionPlan = async () => {
 
 		const plan = await client.user.findUnique({
 			where: {
-				clerkId: user.id
+				clerkId: user.id,
 			},
 			select: {
 				subscription: {
@@ -145,4 +141,20 @@ export const onGetAllAccountDomains = async () => {
 	} catch (error) {
 		console.error(error);
 	}
-}
+};
+
+export const onUpdatePassword = async (password: string) => {
+	try {
+		const user = await currentUser();
+
+		if (!user) return;
+
+		const update = await clerkClient.users.updateUser(user.id, { password });
+
+		if (update) {
+			return { status: 200, message: 'Password updated' };
+		}
+	} catch (err) {
+		console.log(err);
+	}
+};
