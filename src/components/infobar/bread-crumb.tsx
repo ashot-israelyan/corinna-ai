@@ -5,8 +5,7 @@ import { Loader } from '../loader';
 import { Switch } from '../ui/switch';
 
 const BreadCrumb = () => {
-	const { chatRoom, expand, loading, onActivateRealtime, onExpand, page, onSignOut, realtime } =
-		useSideBar();
+	const { chatRoom, loading, onActivateRealtime, page, realtime } = useSideBar();
 
 	return (
 		<div className="flex flex-col ">

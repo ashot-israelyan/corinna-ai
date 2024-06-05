@@ -184,6 +184,7 @@ export const onGetCurrentDomainInfo = async (domain: string) => {
 						name: true,
 						icon: true,
 						userId: true,
+						products: true,
 						chatBot: {
 							select: {
 								id: true,
