@@ -5,8 +5,8 @@ import { ChangePasswordProps, ChangePasswordSchema } from '@/schemas/auth.schema
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useToast } from '@/components/ui/use-toast';
 import { useCallback, useEffect, useState } from 'react';
-import { onChatBotImageUpdate, onCreateHelpDeskQuestion, onDeleteUserDomain, onGetAllHelpDeskQuestions, onUpdateDomain, onUpdatePassword, onUpdateWelcomeMessage } from '@/actions/settings';
-import { DomainSettingsProps, DomainSettingsSchema, HelpDeskQuestionsProps, HelpDeskQuestionsSchema } from '@/schemas/settings.schema';
+import { onChatBotImageUpdate, onCreateFilterQuestions, onCreateHelpDeskQuestion, onDeleteUserDomain, onGetAllFilterQuestions, onGetAllHelpDeskQuestions, onUpdateDomain, onUpdatePassword, onUpdateWelcomeMessage } from '@/actions/settings';
+import { DomainSettingsProps, DomainSettingsSchema, FilterQuestionsProps, FilterQuestionsSchema, HelpDeskQuestionsProps, HelpDeskQuestionsSchema } from '@/schemas/settings.schema';
 import { useRouter } from 'next/navigation';
 
 const upload = new UploadClient({
@@ -186,3 +186,55 @@ export const useHelpDesk = (id: string) => {
 		loading,
 	}
 }
+
+export const useFilterQuestions = (id: string) => {
+	const {
+		register,
+		handleSubmit,
+		formState: { errors },
+		reset,
+	} = useForm<FilterQuestionsProps>({
+		resolver: zodResolver(FilterQuestionsSchema),
+	});
+
+	const { toast } = useToast();
+	const [loading, setLoading] = useState<boolean>(false);
+	const [isQuestions, setIsQuestions] = useState<
+		{ id: string; question: string }[]
+	>([]);
+
+	const onAddFilterQuestions = handleSubmit(async (values) => {
+		setLoading(true)
+		const questions = await onCreateFilterQuestions(id, values.question);
+		if (questions) {
+			setIsQuestions(questions.questions!);
+			toast({
+				title: questions.status == 200 ? 'Success' : 'Error',
+				description: questions.message,
+			});
+			reset();
+			setLoading(false);
+		}
+	});
+
+	const onGetQuestions = useCallback(async () => {
+		setLoading(true);
+		const questions = await onGetAllFilterQuestions(id);
+		if (questions) {
+			setIsQuestions(questions.questions);
+			setLoading(false);
+		}
+	}, [id]);
+
+	useEffect(() => {
+		onGetQuestions()
+	}, [onGetQuestions])
+
+	return {
+		loading,
+		onAddFilterQuestions,
+		register,
+		errors,
+		isQuestions,
+	}
+};
