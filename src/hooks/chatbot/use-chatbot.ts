@@ -1,9 +1,9 @@
 import { UploadClient } from '@uploadcare/upload-client';
 import { onAiChatBotAssistant, onGetCurrentChatBot } from '@/actions/bot';
-import { postToParent } from '@/lib/utils';
+import { postToParent, pusherClient } from '@/lib/utils';
 import { ChatBotMessageProps, ChatBotMessageSchema } from '@/schemas/conversation.schema';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useEffect, useRef, useState } from 'react';
+import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
 const upload = new UploadClient({
@@ -187,3 +187,33 @@ export const useChatBot = () => {
 		errors,
 	};
 };
+
+export const useRealTime = (chatRoom: string, setChats: Dispatch<SetStateAction<{
+	role: 'user' | 'assistant';
+	content: string;
+	link?: string | undefined;
+}[]>>) => {
+	const counterRef = useRef(1);
+
+	useEffect(() => {
+		pusherClient.subscribe(chatRoom);
+		pusherClient.bind('realtime-mode', (data: any) => {
+			console.log('✅', data);
+			if (counterRef.current !== 1) {
+				setChats((prev: any) => [
+					...prev,
+					{
+						role: data.chat.role,
+						content: data.chat.message,
+					}
+				])
+			}
+			counterRef.current += 1;
+		});
+
+		return () => {
+			pusherClient.unbind('realtime-mode');
+			pusherClient.unsubscribe(chatRoom);
+		}
+	}, [chatRoom, setChats])
+}

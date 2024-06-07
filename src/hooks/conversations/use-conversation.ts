@@ -134,6 +134,7 @@ export const useChatWindow = () => {
 		if (chatRoom) {
 			pusherClient.subscribe(chatRoom);
 			pusherClient.bind('realtime-mode', (data: any) => {
+				console.log(data);
 				setChats((prev) => [...prev, data.chat]);
 			})
 
