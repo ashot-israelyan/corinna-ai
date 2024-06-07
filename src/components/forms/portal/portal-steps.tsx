@@ -2,6 +2,7 @@ import { Dispatch, FC, SetStateAction } from 'react';
 import { FieldErrors, FieldValues, UseFormRegister } from 'react-hook-form';
 import QuestionsForm from './questions';
 import BookAppointmentDate from './booking-date';
+import PaymentCheckout from '@/components/forms/portal/product-checkout';
 
 type Props = {
 	questions: {
@@ -73,6 +74,12 @@ const PortalSteps: FC<Props> = ({
 				onSlot={onSlot}
 				loading={loading}
 			/>
+		);
+	}
+
+	if (step === 2 && type === 'Payment') {
+		return (
+			<PaymentCheckout products={products} stripeId={stripeId} onNext={onNext} amount={amount} />
 		);
 	}
 	return (
