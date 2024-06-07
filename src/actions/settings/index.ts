@@ -165,7 +165,7 @@ export const onGetCurrentDomainInfo = async (domain: string) => {
 	try {
 		const userDomain = await client.user.findUnique({
 			where: {
-				clerkId: user.id
+				clerkId: user.id,
 			},
 			select: {
 				subscription: {
@@ -221,7 +221,7 @@ export const onUpdateDomain = async (id: string, name: string) => {
 					id,
 				},
 				data: {
-					name
+					name,
 				},
 			});
 
@@ -229,23 +229,23 @@ export const onUpdateDomain = async (id: string, name: string) => {
 				return {
 					status: 200,
 					message: 'Domain updated',
-				}
+				};
 			}
 
 			return {
 				status: 400,
 				message: 'Oops something went wrong!',
-			}
+			};
 		}
 
 		return {
 			status: 400,
 			message: 'Domain with this name already exists',
-		}
+		};
 	} catch (error) {
 		console.log(error);
 	}
-}
+};
 
 export const onChatBotImageUpdate = async (id: string, icon: string) => {
 	const user = await currentUser();
@@ -272,13 +272,13 @@ export const onChatBotImageUpdate = async (id: string, icon: string) => {
 			return {
 				status: 200,
 				message: 'Domain updated',
-			}
+			};
 		}
 
 		return {
 			status: 400,
 			message: 'Oops something went wrong!',
-		}
+		};
 	} catch (error) {
 		console.log(error);
 	}
@@ -321,7 +321,7 @@ export const onDeleteUserDomain = async (id: string) => {
 			},
 			select: {
 				id: true,
-			}
+			},
 		});
 
 		if (validUser) {
@@ -339,7 +339,7 @@ export const onDeleteUserDomain = async (id: string) => {
 				return {
 					status: 200,
 					message: `${deletedDomain.name} was deleted successfully`,
-				}
+				};
 			}
 		}
 	} catch (error) {
@@ -377,13 +377,13 @@ export const onCreateHelpDeskQuestion = async (id: string, question: string, ans
 				status: 200,
 				message: 'New help desk question added',
 				questions: helpDeskQuestion.helpdesk,
-			}
+			};
 		}
 
 		return {
 			status: 400,
 			message: 'Oops! something went wrong',
-		}
+		};
 	} catch (error) {
 		console.log(error);
 	}
@@ -399,16 +399,16 @@ export const onGetAllHelpDeskQuestions = async (id: string) => {
 				question: true,
 				answer: true,
 				id: true,
-			}
+			},
 		});
 
 		return {
 			status: 200,
 			message: 'New help desk question added',
 			questions,
-		}
+		};
 	} catch (error) {
-		console.log(error)
+		console.log(error);
 	}
 };
 
@@ -445,8 +445,8 @@ export const onCreateFilterQuestions = async (id: string, question: string) => {
 
 		return {
 			status: 400,
-			message: 'Oops! something went wrong'
-		}
+			message: 'Oops! something went wrong',
+		};
 	} catch (error) {
 		console.log(error);
 	}
@@ -471,8 +471,30 @@ export const onGetAllFilterQuestions = async (id: string) => {
 			status: 200,
 			message: '',
 			questions: questions,
+		};
+	} catch (error) {
+		console.log(error);
+	}
+};
+
+export const onGetPaymentConnected = async () => {
+	try {
+		const user = await currentUser();
+		if (user) {
+			const connected = await client.user.findUnique({
+				where: {
+					clerkId: user.id,
+				},
+				select: {
+					stripeId: true,
+				},
+			});
+
+			if (connected) {
+				return connected.stripeId;
+			}
 		}
 	} catch (error) {
-		console.log(error)
+		console.log(error);
 	}
-}
+};
