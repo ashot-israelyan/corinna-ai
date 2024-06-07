@@ -4,6 +4,7 @@ import SettingsForm from '@/components/forms/settings/form';
 import InfoBar from '@/components/infobar';
 import { redirect } from 'next/navigation';
 import { FC } from 'react';
+import ProductTable from '@/components/products';
 
 type Props = {
 	params: {
@@ -26,6 +27,7 @@ const DomainSettingsPage: FC<Props> = async ({ params }) => {
 					name={domain.domains[0].name}
 				/>
 				<BotTrainingForm id={domain.domains[0].id} />
+				<ProductTable id={domain.domains[0].id} products={domain.domains[0].products || []} />
 			</div>
 		</>
 	);
