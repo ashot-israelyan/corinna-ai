@@ -62,7 +62,7 @@ export const useEmailMarketing = () => {
 
 	const onCreateEmailTemplate = SubmitEmail(async (values) => {
 		try {
-			setLoading(true);
+			setEditing(true);
 			const template = JSON.stringify(values.description);
 			const emailTemplate = await onSaveEmailTemplate(template, campaignId!);
 
@@ -72,7 +72,7 @@ export const useEmailMarketing = () => {
 					title: 'Success',
 					description: emailTemplate.message,
 				});
-				setLoading(false);
+				setEditing(false);
 			}
 		} catch (error) {
 			console.log(error);
