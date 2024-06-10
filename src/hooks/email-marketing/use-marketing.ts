@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { EmailMarketingBodySchema, EmailMarketingSchema } from '@/schemas/marketing.schema';
@@ -8,6 +8,8 @@ import {
 	onAddCustomersToEmail,
 	onBulkMailer,
 	onCreateMarketingCampaign,
+	onGetAllCustomerResponses,
+	onGetEmailTemplate,
 	onSaveEmailTemplate,
 } from '@/actions/mail';
 
@@ -144,3 +146,57 @@ export const useEmailMarketing = () => {
 		setValue,
 	};
 };
+
+export const useAnswers = (id: string) => {
+	const [answers, setAnswers] = useState<
+		{
+			customer: {
+				questions: { question: string; answered: string | null }[]
+			}[]
+		}[]
+	>([])
+	const [loading, setLoading] = useState<boolean>(false)
+
+	const onGetCustomerAnswers = useCallback(async () => {
+		try {
+			setLoading(true)
+			const answer = await onGetAllCustomerResponses(id)
+			setLoading(false)
+			if (answer) {
+				setAnswers(answer)
+			}
+		} catch (error) {
+			console.log(error)
+		}
+	}, [id]);
+
+	useEffect(() => {
+		onGetCustomerAnswers()
+	}, [onGetCustomerAnswers]);
+
+	return { answers, loading }
+}
+
+export const useEditEmail = (id: string) => {
+	const [loading, setLoading] = useState<boolean>(false)
+	const [template, setTemplate] = useState<string>('')
+
+	const onGetTemplate = useCallback(async (id: string) => {
+		try {
+			setLoading(true)
+			const email = await onGetEmailTemplate(id)
+			if (email) {
+				setTemplate(email)
+			}
+			setLoading(false)
+		} catch (error) {
+			console.log(error)
+		}
+	}, []);
+
+	useEffect(() => {
+		onGetTemplate(id)
+	}, [id, onGetTemplate])
+
+	return { loading, template }
+}

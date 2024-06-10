@@ -191,3 +191,62 @@ export const onBulkMailer = async (email: string[], campaignId: string) => {
 		console.log(error);
 	}
 };
+
+export const onGetAllCustomerResponses = async (id: string) => {
+	try {
+		const user = await currentUser()
+		if (!user) return null
+		const answers = await client.user.findUnique({
+			where: {
+				clerkId: user.id,
+			},
+			select: {
+				domains: {
+					select: {
+						customer: {
+							select: {
+								questions: {
+									where: {
+										customerId: id,
+										answered: {
+											not: null,
+										},
+									},
+									select: {
+										question: true,
+										answered: true,
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		})
+
+		if (answers) {
+			return answers.domains
+		}
+	} catch (error) {
+		console.log(error)
+	}
+}
+
+export const onGetEmailTemplate = async (id: string) => {
+	try {
+		const template = await client.campaign.findUnique({
+			where: {
+				id,
+			},
+			select: {
+				template: true,
+			},
+		});
+
+		if (template) {
+			return template.template;
+		}
+	} catch (error) {
+		console.log(error);
+	}
+};
